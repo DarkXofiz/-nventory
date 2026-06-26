@@ -4,8 +4,7 @@
   "package": "com.inventorymod.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "ChestScreenMixin",
-    "EnderChestScreenMixin"
+    "ChestScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
