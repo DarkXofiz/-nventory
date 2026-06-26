@@ -1,16 +1,14 @@
 {
   "schemaVersion": 1,
   "id": "inventorymod",
-  "version": "${version}",
-  "name": "Genis Sandik Mod",
-  "description": "Genis Sandik, Ender Chest ve PV sekmeli envanter UI modu",
+  "version": "1.0.0",
+  "name": "Inventory Mod",
+  "description": "Chest, Ender Chest ve PlayerVaults'a hızlı butonlar ekler",
   "authors": ["Sen"],
-  "contact": {},
-  "license": "MIT",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.inventorymod.InventoryMod"
+      "com.inventorymod.InventoryModClient"
     ]
   },
   "mixins": [
@@ -18,7 +16,8 @@
   ],
   "depends": {
     "fabricloader": ">=0.15.0",
-    "fabric-api": "*",
-    "minecraft": "~1.21"
+    "minecraft": "~1.21",
+    "java": ">=21",
+    "fabric-api": "*"
   }
 }
