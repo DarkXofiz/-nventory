@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "inventorymod",
+  "version": "${version}",
+  "name": "Genis Sandik Mod",
+  "description": "Genis Sandik, Ender Chest ve PV sekmeli envanter UI modu",
+  "authors": ["Sen"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.inventorymod.InventoryMod"
+    ]
+  },
+  "mixins": [
+    "inventorymod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21"
+  }
+}
