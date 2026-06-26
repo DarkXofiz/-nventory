@@ -26,27 +26,27 @@ public abstract class ChestScreenMixin extends net.minecraft.client.gui.screen.i
         int gap  = 3;
         int btnY = this.y + 4;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Herşeyi At"), b -> throwAll())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.drop_all"), b -> dropAll())
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Oto Ekipman"), b -> autoEquip())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.auto_equip"), b -> autoEquip())
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Herşeyi Koy"), b -> putAll())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.put_all"), b -> putAll())
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Herşeyi Al"), b -> takeAll())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.take_all"), b -> takeAll())
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("Çöpleri At"), b -> throwJunk())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.drop_junk"), b -> dropJunk())
                 .dimensions(btnX, btnY, btnW, btnH).build());
     }
 
-    private void throwAll() {
+    private void dropAll() {
         if (this.client == null || this.client.player == null) return;
         int size = this.handler.getRows() * 9;
         for (int i = 0; i < size; i++) {
@@ -89,7 +89,7 @@ public abstract class ChestScreenMixin extends net.minecraft.client.gui.screen.i
         }
     }
 
-    private void throwJunk() {
+    private void dropJunk() {
         if (this.client == null || this.client.player == null) return;
         int size = this.handler.getRows() * 9;
         for (int i = 0; i < size; i++) {
