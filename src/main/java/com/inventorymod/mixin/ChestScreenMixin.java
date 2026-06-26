@@ -1,6 +1,7 @@
 package com.inventorymod.mixin;
 
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -11,92 +12,99 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(GenericContainerScreen.class)
-public abstract class ChestScreenMixin extends net.minecraft.client.gui.screen.ingame.HandledScreen<GenericContainerScreenHandler> {
+@Mixin(HandledScreen.class)
+public abstract class ChestScreenMixin extends net.minecraft.client.gui.screen.Screen {
 
-    public ChestScreenMixin(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
-        super(handler, inventory, title);
+    public ChestScreenMixin(Text title) {
+        super(title);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
     private void injectButtons(CallbackInfo ci) {
-        int btnX = this.x + this.backgroundWidth + 4;
+        if (!(Object)this instanceof GenericContainerScreen screen) return;
+
+        int btnX = this.width / 2 + 92 + 4;
         int btnW = 90;
         int btnH = 18;
         int gap  = 3;
-        int btnY = this.y + 4;
+        int btnY = this.height / 2 - 83;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.drop_all"), b -> dropAll())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.drop_all"), b -> dropAll(screen))
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.auto_equip"), b -> autoEquip())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.auto_equip"), b -> autoEquip(screen))
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.put_all"), b -> putAll())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.put_all"), b -> putAll(screen))
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.take_all"), b -> takeAll())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.take_all"), b -> takeAll(screen))
                 .dimensions(btnX, btnY, btnW, btnH).build());
         btnY += btnH + gap;
 
-        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.drop_junk"), b -> dropJunk())
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("button.inventorymod.drop_junk"), b -> dropJunk(screen))
                 .dimensions(btnX, btnY, btnW, btnH).build());
     }
 
-    private void dropAll() {
+    private void dropAll(GenericContainerScreen screen) {
         if (this.client == null || this.client.player == null) return;
-        int size = this.handler.getRows() * 9;
+        var handler = screen.getScreenHandler();
+        int size = handler.getRows() * 9;
         for (int i = 0; i < size; i++) {
-            ItemStack stack = this.handler.getSlot(i).getStack();
+            ItemStack stack = handler.getSlot(i).getStack();
             if (!stack.isEmpty()) {
                 this.client.player.dropItem(stack.copy(), false);
-                this.handler.getSlot(i).setStack(ItemStack.EMPTY);
+                handler.getSlot(i).setStack(ItemStack.EMPTY);
             }
         }
     }
 
-    private void autoEquip() {
+    private void autoEquip(GenericContainerScreen screen) {
         if (this.client == null || this.client.player == null) return;
-        int size = this.handler.getRows() * 9;
+        var handler = screen.getScreenHandler();
+        int size = handler.getRows() * 9;
         for (int i = 0; i < size; i++) {
-            if (!this.handler.getSlot(i).getStack().isEmpty()) {
-                this.handler.quickMove(this.client.player, i);
+            if (!handler.getSlot(i).getStack().isEmpty()) {
+                handler.quickMove(this.client.player, i);
             }
         }
     }
 
-    private void putAll() {
+    private void putAll(GenericContainerScreen screen) {
         if (this.client == null || this.client.player == null) return;
-        int size = this.handler.getRows() * 9;
-        int total = this.handler.slots.size();
+        var handler = screen.getScreenHandler();
+        int size = handler.getRows() * 9;
+        int total = handler.slots.size();
         for (int i = size; i < total; i++) {
-            if (!this.handler.getSlot(i).getStack().isEmpty()) {
-                this.handler.quickMove(this.client.player, i);
+            if (!handler.getSlot(i).getStack().isEmpty()) {
+                handler.quickMove(this.client.player, i);
             }
         }
     }
 
-    private void takeAll() {
+    private void takeAll(GenericContainerScreen screen) {
         if (this.client == null || this.client.player == null) return;
-        int size = this.handler.getRows() * 9;
+        var handler = screen.getScreenHandler();
+        int size = handler.getRows() * 9;
         for (int i = 0; i < size; i++) {
-            if (!this.handler.getSlot(i).getStack().isEmpty()) {
-                this.handler.quickMove(this.client.player, i);
+            if (!handler.getSlot(i).getStack().isEmpty()) {
+                handler.quickMove(this.client.player, i);
             }
         }
     }
 
-    private void dropJunk() {
+    private void dropJunk(GenericContainerScreen screen) {
         if (this.client == null || this.client.player == null) return;
-        int size = this.handler.getRows() * 9;
+        var handler = screen.getScreenHandler();
+        int size = handler.getRows() * 9;
         for (int i = 0; i < size; i++) {
-            ItemStack stack = this.handler.getSlot(i).getStack();
+            ItemStack stack = handler.getSlot(i).getStack();
             if (!stack.isEmpty() && isJunk(stack)) {
                 this.client.player.dropItem(stack.copy(), false);
-                this.handler.getSlot(i).setStack(ItemStack.EMPTY);
+                handler.getSlot(i).setStack(ItemStack.EMPTY);
             }
         }
     }
