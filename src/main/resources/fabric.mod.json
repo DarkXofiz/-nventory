@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "inventorymod",
+  "version": "1.0.0",
+  "name": "Inventory Mod",
+  "description": "Sandık ekranına Türkçe butonlar ekler: Herşeyi Al, Herşeyi Koy, Herşeyi At, Çöpleri At, Oto Ekipman",
+  "authors": ["Sen"],
+  "contact": {},
+
+  "license": "MIT",
+
+  "environment": "*",
+
+  "entrypoints": {
+    "main": [
+      "com.inventorymod.InventoryMod"
+    ],
+    "client": [
+      "com.inventorymod.InventoryModClient"
+    ]
+  },
+
+  "accessWidener": "inventorymod.accesswidener",
+
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21"
+  }
+}
