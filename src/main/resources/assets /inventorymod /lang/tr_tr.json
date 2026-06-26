@@ -1,1 +1,7 @@
-
+{
+    "button.inventorymod.drop_all": "Herşeyi At",
+    "button.inventorymod.auto_equip": "Oto Ekipman",
+    "button.inventorymod.put_all": "Herşeyi Koy",
+    "button.inventorymod.take_all": "Herşeyi Al",
+    "button.inventorymod.drop_junk": "Çöpleri At"
+}
