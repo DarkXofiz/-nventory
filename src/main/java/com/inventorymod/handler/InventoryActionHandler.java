@@ -19,9 +19,7 @@ public class InventoryActionHandler {
         ScreenHandler handler = screen.getScreenHandler();
         List<Slot> result = new ArrayList<>();
         for (Slot slot : handler.slots) {
-            if (slot.inventory == client.player.getInventory()) {
-                result.add(slot);
-            }
+            if (slot.inventory == client.player.getInventory()) result.add(slot);
         }
         return result;
     }
@@ -49,19 +47,16 @@ public class InventoryActionHandler {
 
     private static void dropSlot(HandledScreen<?> screen, MinecraftClient client, Slot slot) {
         if (client.player == null || client.interactionManager == null || slot.getStack().isEmpty()) return;
-
         ScreenHandler handler = screen.getScreenHandler();
         client.interactionManager.clickSlot(handler.syncId, slot.id, 1, SlotActionType.THROW, client.player);
         InventoryMod.LOGGER.info("[InvMod] Dropped → Slot: {} | Item: {}", slot.id, slot.getStack().getItem());
     }
 
-    /** ANA METOD - Herseyi At */
     public static void dropAllFromCurrentContainer(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
 
         ScreenHandler handler = screen.getScreenHandler();
-        InventoryMod.LOGGER.info("[InvMod] Drop All → Handler: {} | Slot: {}", 
-            handler.getClass().getSimpleName(), handler.slots.size());
+        InventoryMod.LOGGER.info("[InvMod] Drop All → Handler: {}", handler.getClass().getSimpleName());
 
         List<Slot> slotsToDrop = getNonPlayerSlots(screen, client);
         if (slotsToDrop.isEmpty()) {
@@ -73,17 +68,21 @@ public class InventoryActionHandler {
             dropSlot(screen, client, slot);
             count++;
         }
-
         InventoryMod.LOGGER.info("[InvMod] {} item atıldı!", count);
     }
 
-    // Diğer metotlarınız (kısaltıldı, kendi kodunuzdan kopyalayın)
-    public static void putAllToChest(HandledScreen<?> screen, MinecraftClient client) { /* ... */ }
-    public static void takeAllFromChest(HandledScreen<?> screen, MinecraftClient client) { /* ... */ }
-    public static void dropJunkItems(HandledScreen<?> screen, MinecraftClient client) { /* ... */ }
-    public static void autoEquipBest(HandledScreen<?> screen, MinecraftClient client) { /* ... */ }
+    // ESKİ İSİM İÇİN KÖPRÜ (Butonlarınız için)
+    public static void dropAllFromInventory(HandledScreen<?> screen, MinecraftClient client) {
+        dropAllFromCurrentContainer(screen, client);
+    }
 
-    public static boolean isJunk(ItemStack stack) { /* ... */ return false; }
-    private static boolean isGoodEquipment(String id) { /* ... */ return false; }
-    private static boolean isEquipment(ItemStack stack) { /* ... */ return false; }
+    // Diğer metotlarınız (putAllToChest, takeAllFromChest vs.)
+    public static void putAllToChest(HandledScreen<?> screen, MinecraftClient client) { /* kodunuz */ }
+    public static void takeAllFromChest(HandledScreen<?> screen, MinecraftClient client) { /* kodunuz */ }
+    public static void dropJunkItems(HandledScreen<?> screen, MinecraftClient client) { /* kodunuz */ }
+    public static void autoEquipBest(HandledScreen<?> screen, MinecraftClient client) { /* kodunuz */ }
+
+    public static boolean isJunk(ItemStack stack) { /* kodunuz */ return false; }
+    private static boolean isGoodEquipment(String id) { /* kodunuz */ return false; }
+    private static boolean isEquipment(ItemStack stack) { /* kodunuz */ return false; }
 }
