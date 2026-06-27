@@ -165,7 +165,7 @@ public class InventoryActionHandler {
 
         // --- Yontem 2 (Fallback): QUICK_MOVE -> envantere cek -> THROW ---
         // Slot hala dolu mu? (PICKUP basarisiz olduysa)
-        // Client-side slot stack anlık guncellenebilir, kisa gecikme sonrasi kontrol
+        // Client-side slot stack anlik guncellenebilir, kisa gecikme sonrasi kontrol
         // Fabric'te scheduleTask ile bir tick sonraya birakmak gerekebilir
         // Burada senkron yapiyoruz — cap olmayan durumlarda yeterli
         ItemStack after = slot.getStack();
@@ -374,7 +374,7 @@ public class InventoryActionHandler {
      * Cop enchant kontrolu:
      * Koruma/Keskinlik/Verimlilik 1-20 arasi -> cop
      *
-     * HARIÇ TUTULANLAR (hic dokunulmuyor):
+     * HARIC TUTULANLAR (hic dokunulmuyor):
      *   - netherite_sword, netherite_pickaxe, netherite_axe + tum netherite set
      *   - diamond_sword,   diamond_pickaxe,   diamond_axe   + tum diamond set
      */
