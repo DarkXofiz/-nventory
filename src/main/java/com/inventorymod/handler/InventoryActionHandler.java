@@ -1,5 +1,6 @@
 package com.inventorymod.handler;
 
+import com.inventorymod.InventoryMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
@@ -13,6 +14,11 @@ import java.util.List;
 
 public class InventoryActionHandler {
 
+    /**
+     * Her zaman oyuncunun 36 slotunu bul.
+     * Strateji: once player.getInventory() eslemesi, sonra son 36 slot fallback.
+     * DEBUG logu ile hangi slotlarin secildigini gosterir.
+     */
     private static List<Slot> getPlayerSlots(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null) return List.of();
         ScreenHandler handler = screen.getScreenHandler();
@@ -24,9 +30,16 @@ public class InventoryActionHandler {
             }
         }
 
-        if (result.isEmpty() && handler.slots.size() >= 36) {
+        if (result.isEmpty()) {
+            // Fallback: son 36 slot
             List<Slot> all = handler.slots;
-            result.addAll(all.subList(all.size() - 36, all.size()));
+            int total = all.size();
+            InventoryMod.LOGGER.info("[InvMod] Player slots bulunamadi, fallback: toplam slot={}, son 36 aliniyor", total);
+            if (total >= 36) {
+                result.addAll(all.subList(total - 36, total));
+            }
+        } else {
+            InventoryMod.LOGGER.info("[InvMod] Player slots bulundu: {} slot", result.size());
         }
 
         return result;
@@ -36,43 +49,39 @@ public class InventoryActionHandler {
         if (client.player == null) return List.of();
         ScreenHandler handler = screen.getScreenHandler();
         List<Slot> result = new ArrayList<>();
+        boolean hasPlayerSlots = false;
+
         for (Slot slot : handler.slots) {
-            if (slot.inventory != client.player.getInventory()) {
+            if (slot.inventory == client.player.getInventory()) {
+                hasPlayerSlots = true;
+            } else {
                 result.add(slot);
             }
         }
-        if (result.size() == handler.slots.size() && handler.slots.size() >= 36) {
-            result = new ArrayList<>(handler.slots.subList(0, handler.slots.size() - 36));
+
+        // Sunucu tarafli ekran — ilk (total-36) slotu chest say
+        if (!hasPlayerSlots && handler.slots.size() >= 36) {
+            result.clear();
+            result.addAll(handler.slots.subList(0, handler.slots.size() - 36));
         }
+
         return result;
     }
 
     /**
-     * Bir slottaki itemi guvenlice yere birak.
-     * Yontem: slot index -999 ile PICKUP = vanilla drop, her ekranda calisir.
-     * Elde kalan item varsa temizle.
+     * Drop yontemi: SlotActionType.THROW ile tum stack'i at.
+     * Bu client-side envanter slotlari icin her zaman calisir.
+     * Ender Chest/PV2 acikken bile envanter slotlari CLIENT taraflidir.
      */
     private static void dropSlot(HandledScreen<?> screen, MinecraftClient client, Slot slot) {
         if (client.player == null || client.interactionManager == null) return;
         ScreenHandler handler = screen.getScreenHandler();
 
-        // 1. Itemi ele al
+        // button=1, SlotActionType.THROW = tum stack'i yere at (Ctrl+Q gibi)
         client.interactionManager.clickSlot(
-            handler.syncId, slot.id, 0, SlotActionType.PICKUP, client.player);
+            handler.syncId, slot.id, 1, SlotActionType.THROW, client.player);
 
-        // 2. Elde item varsa -999 ile yere birak
-        ItemStack cursor = client.player.currentScreenHandler.getCursorStack();
-        if (!cursor.isEmpty()) {
-            client.interactionManager.clickSlot(
-                handler.syncId, -999, 0, SlotActionType.PICKUP, client.player);
-        }
-
-        // 3. Hala elde item varsa (sunucu reddetti), geri koy
-        cursor = client.player.currentScreenHandler.getCursorStack();
-        if (!cursor.isEmpty()) {
-            client.interactionManager.clickSlot(
-                handler.syncId, slot.id, 0, SlotActionType.PICKUP, client.player);
-        }
+        InventoryMod.LOGGER.info("[InvMod] Drop slot id={} item={}", slot.id, slot.getStack().getItem());
     }
 
     public static void putAllToChest(HandledScreen<?> screen, MinecraftClient client) {
@@ -97,7 +106,9 @@ public class InventoryActionHandler {
 
     public static void dropAllFromInventory(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
-        for (Slot slot : getPlayerSlots(screen, client)) {
+        List<Slot> slots = getPlayerSlots(screen, client);
+        InventoryMod.LOGGER.info("[InvMod] dropAll: {} slot bulundu", slots.size());
+        for (Slot slot : slots) {
             if (!slot.getStack().isEmpty()) {
                 dropSlot(screen, client, slot);
             }
@@ -114,14 +125,24 @@ public class InventoryActionHandler {
         }
     }
 
+    /**
+     * OTO EKIPMAN — zirh ve silah giyer.
+     * QUICK_MOVE client-side envanterden ekipman slotuna tasir, sunucu onaylar.
+     * SW gibi sunucularda ekipman degistirme yasak olabilir — o zaman giymiyor.
+     */
     public static void autoEquipBest(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
         ScreenHandler handler = screen.getScreenHandler();
+
+        // Envanter ekraninda (E tusu) slot 0-8 = armor+offhand+craft
+        // QUICK_MOVE zirhi dogru slota gonderir
         for (Slot slot : getPlayerSlots(screen, client)) {
             ItemStack stack = slot.getStack();
-            if (!stack.isEmpty() && isEquipment(stack))
+            if (!stack.isEmpty() && isEquipment(stack)) {
                 client.interactionManager.clickSlot(
                     handler.syncId, slot.id, 0, SlotActionType.QUICK_MOVE, client.player);
+                InventoryMod.LOGGER.info("[InvMod] Equip: slot={} item={}", slot.id, stack.getItem());
+            }
         }
     }
 
@@ -165,7 +186,6 @@ public class InventoryActionHandler {
         if (id.contains("stone_pickaxe"))        return true;
         if (id.contains("stone_axe"))            return true;
         if (id.contains("stone_shovel"))         return true;
-        if (id.contains("stone_hoe"))            return true;
         if (id.contains("wooden_sword"))         return true;
         if (id.contains("wooden_pickaxe"))       return true;
         if (id.contains("wooden_axe"))           return true;
@@ -193,4 +213,5 @@ public class InventoryActionHandler {
             || id.contains("bow") || id.contains("crossbow")
             || id.contains("trident") || id.contains("shield");
     }
-}
+                    }
+            
