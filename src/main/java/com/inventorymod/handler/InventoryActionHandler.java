@@ -12,13 +12,12 @@ import java.util.List;
 
 public class InventoryActionHandler {
 
-    // Envanterden sandığa HERŞEYİ KOY
+    // Envanterden sandiga HERSEYi KOY
     public static void putAllToChest(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
         ScreenHandler handler = screen.getScreenHandler();
         List<Slot> slots = handler.slots;
         int playerStart = slots.size() - 36;
-
         for (int i = playerStart; i < slots.size(); i++) {
             Slot slot = slots.get(i);
             if (!slot.getStack().isEmpty()) {
@@ -28,13 +27,12 @@ public class InventoryActionHandler {
         }
     }
 
-    // Sandıktan envanterine HERŞEYİ AL
+    // Sandiktan envanterine HERSEYi AL
     public static void takeAllFromChest(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
         ScreenHandler handler = screen.getScreenHandler();
         List<Slot> slots = handler.slots;
         int chestSlotCount = slots.size() - 36;
-
         for (int i = 0; i < chestSlotCount; i++) {
             Slot slot = slots.get(i);
             if (!slot.getStack().isEmpty()) {
@@ -44,13 +42,12 @@ public class InventoryActionHandler {
         }
     }
 
-    // Envanterden HERŞEYİ AT (yere bırakır, silmez)
+    // Envanterden HERSEYi AT (yere birakir, silmez)
     public static void dropAllFromInventory(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
         ScreenHandler handler = screen.getScreenHandler();
         List<Slot> slots = handler.slots;
         int playerStart = slots.size() - 36;
-
         for (int i = playerStart; i < slots.size(); i++) {
             Slot slot = slots.get(i);
             if (!slot.getStack().isEmpty()) {
@@ -60,16 +57,16 @@ public class InventoryActionHandler {
         }
     }
 
-    // Envanterden COPLERI AT — sadece envanter ekranında kullanılır
-    public static void dropJunkFromInventory(HandledScreen<?> screen, MinecraftClient client) {
+    /**
+     * COPLERi AT — hem sandik hem envanter ekraninda calisir.
+     * Her zaman PLAYER slotlarini (son 36) tarar.
+     * Ender Chest'e item koyunca da envanteri tarar, dogru calisir.
+     */
+    public static void dropJunkItems(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
         ScreenHandler handler = screen.getScreenHandler();
         List<Slot> slots = handler.slots;
-
-        // Envanter ekranı: slotlar direkt player slotlarıdır (craft + armor + player)
-        // Son 36 slot = player inventory + hotbar
         int playerStart = slots.size() - 36;
-
         for (int i = playerStart; i < slots.size(); i++) {
             Slot slot = slots.get(i);
             ItemStack stack = slot.getStack();
@@ -80,18 +77,17 @@ public class InventoryActionHandler {
         }
     }
 
-    // Sandık ekranındaki envanterden COPLERI AT
-    public static void dropJunkItems(HandledScreen<?> screen, MinecraftClient client) {
-        dropJunkFromInventory(screen, client);
+    // dropJunkFromInventory = ayni metod, geriye donus uyumlulugu icin
+    public static void dropJunkFromInventory(HandledScreen<?> screen, MinecraftClient client) {
+        dropJunkItems(screen, client);
     }
 
-    // OTO EKIPMAN — zırh ve silahları giyer
+    // OTO EKiPMAN
     public static void autoEquipBest(HandledScreen<?> screen, MinecraftClient client) {
         if (client.player == null || client.interactionManager == null) return;
         ScreenHandler handler = screen.getScreenHandler();
         List<Slot> slots = handler.slots;
         int playerStart = slots.size() - 36;
-
         for (int i = playerStart; i < slots.size(); i++) {
             Slot slot = slots.get(i);
             ItemStack stack = slot.getStack();
