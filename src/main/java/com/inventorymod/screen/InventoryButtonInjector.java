@@ -15,8 +15,9 @@ public class InventoryButtonInjector {
     private static final int BUTTON_GAP    = 4;
 
     /**
-     * Sandık / Ender Chest / Shulker Box için 5 buton.
-     * Copleri At buradaki envanter slotlarını da tarar — Ender Chest'e item koyunca çalışır.
+     * Sandik / Ender Chest / Shulker Box:
+     * Herseyi At, Herseyi Koy, Herseyi Al, Copleri At
+     * Oto Ekipman YOK — sadece envaterde olsun
      */
     public static void injectChestButtons(HandledScreen<?> screen, MinecraftClient client) {
         int guiLeft = (screen.width - 176) / 2;
@@ -27,29 +28,26 @@ public class InventoryButtonInjector {
         addButton(screen, buttonX, startY + step(0), "Herseyi At",
             btn -> InventoryActionHandler.dropAllFromInventory(screen, client));
 
-        addButton(screen, buttonX, startY + step(1), "Oto Ekipman",
-            btn -> InventoryActionHandler.autoEquipBest(screen, client));
-
-        addButton(screen, buttonX, startY + step(2), "Herseyi Koy",
+        addButton(screen, buttonX, startY + step(1), "Herseyi Koy",
             btn -> InventoryActionHandler.putAllToChest(screen, client));
 
-        addButton(screen, buttonX, startY + step(3), "Herseyi Al",
+        addButton(screen, buttonX, startY + step(2), "Herseyi Al",
             btn -> InventoryActionHandler.takeAllFromChest(screen, client));
 
-        addButton(screen, buttonX, startY + step(4), "Copleri At",
+        addButton(screen, buttonX, startY + step(3), "Copleri At",
             btn -> InventoryActionHandler.dropJunkItems(screen, client));
     }
 
     /**
-     * Oyuncu Envanteri (E tusu) icin 3 buton.
-     * startY biraz asagida — zirh slotlarinin altina dusuyor.
+     * Oyuncu Envanteri (E tusu):
+     * Herseyi At, Oto Ekipman, Copleri At
+     * Butonlar ortada — guiTop + 40
      */
     public static void injectInventoryButtons(InventoryScreen screen, MinecraftClient client) {
         int guiLeft = (screen.width - 176) / 2;
         int guiTop  = (screen.height - 166) / 2;
         int buttonX = guiLeft + 176 + 6;
-        // +50 ile asagi kaydiriyoruz — zirh alaninin altina geliyor
-        int startY  = guiTop + 80;
+        int startY  = guiTop + 40;
 
         addButton(screen, buttonX, startY + step(0), "Herseyi At",
             btn -> InventoryActionHandler.dropAllFromInventory(screen, client));
