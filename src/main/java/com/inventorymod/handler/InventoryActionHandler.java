@@ -295,7 +295,50 @@ public class InventoryActionHandler {
 
     public static boolean isJunk(ItemStack stack) {
         String id = stack.getItem().toString().toLowerCase();
-        if (isGoodEquipment(id)) return false;
+
+        // --- Tum materyallerde kilic, kazma, balta, kuprek, zirh — cop ---
+        // Ahsap
+        if (id.contains("wooden_sword"))     return true;
+        if (id.contains("wooden_pickaxe"))   return true;
+        if (id.contains("wooden_axe"))       return true;
+        if (id.contains("wooden_shovel"))    return true;
+        if (id.contains("wooden_hoe"))       return true;
+        // Tas
+        if (id.contains("stone_sword"))      return true;
+        if (id.contains("stone_pickaxe"))    return true;
+        if (id.contains("stone_axe"))        return true;
+        if (id.contains("stone_shovel"))     return true;
+        if (id.contains("stone_hoe"))        return true;
+        // Altin
+        if (id.contains("golden_sword"))     return true;
+        if (id.contains("golden_pickaxe"))   return true;
+        if (id.contains("golden_axe"))       return true;
+        if (id.contains("golden_shovel"))    return true;
+        if (id.contains("golden_hoe"))       return true;
+        if (id.contains("golden_helmet"))    return true;
+        if (id.contains("golden_chestplate"))return true;
+        if (id.contains("golden_leggings"))  return true;
+        if (id.contains("golden_boots"))     return true;
+        // Elmas kilic ve elmas kazma -> cop
+        if (id.contains("diamond_sword"))    return true;
+        if (id.contains("diamond_pickaxe"))  return true;
+
+        // Demir
+        if (id.contains("iron_helmet"))      return true;
+        if (id.contains("iron_chestplate"))  return true;
+        if (id.contains("iron_leggings"))    return true;
+        if (id.contains("iron_boots"))       return true;
+        if (id.contains("iron_sword"))       return true;
+        if (id.contains("iron_pickaxe"))     return true;
+        if (id.contains("iron_axe"))         return true;
+        if (id.contains("iron_shovel"))      return true;
+        if (id.contains("iron_hoe"))         return true;
+        // Zincir + Deri
+        if (id.contains("chainmail_"))       return true;
+        if (id.contains("leather_"))         return true;
+
+        // --- Enchant kontrolu gerektiren itemler ---
+        if (hasJunkEnchants(stack)) return true;
 
         if (stack.isOf(Items.ROTTEN_FLESH))      return true;
         if (stack.isOf(Items.SPIDER_EYE))        return true;
@@ -323,33 +366,76 @@ public class InventoryActionHandler {
         if (stack.isOf(Items.INK_SAC))           return true;
         if (stack.isOf(Items.ARROW))             return true;
 
-        if (id.contains("leather_"))             return true;
-        if (id.contains("chainmail_"))           return true;
-        if (id.contains("golden_helmet"))        return true;
-        if (id.contains("golden_chestplate"))    return true;
-        if (id.contains("golden_leggings"))      return true;
-        if (id.contains("golden_boots"))         return true;
-        if (id.contains("stone_sword"))          return true;
-        if (id.contains("stone_pickaxe"))        return true;
-        if (id.contains("stone_axe"))            return true;
-        if (id.contains("stone_shovel"))         return true;
-        if (id.contains("wooden_sword"))         return true;
-        if (id.contains("wooden_pickaxe"))       return true;
-        if (id.contains("wooden_axe"))           return true;
-        if (id.contains("wooden_shovel"))        return true;
 
         return false;
     }
 
+    /**
+     * Cop enchant kontrolu:
+     * Koruma/Keskinlik/Verimlilik 1-20 arasi -> cop
+     *
+     * HARIÇ TUTULANLAR (hic dokunulmuyor):
+     *   - netherite_sword, netherite_pickaxe, netherite_axe + tum netherite set
+     *   - diamond_sword,   diamond_pickaxe,   diamond_axe   + tum diamond set
+     */
+    private static boolean hasJunkEnchants(ItemStack stack) {
+        if (!stack.hasEnchantments()) return false;
+
+        String id = stack.getItem().toString().toLowerCase();
+
+        // Netherite her sey -> hic dokunma
+        if (id.contains("netherite_")) return false;
+
+        // Elmas: sadece balta ve set/zirh/yay/kalkan -> hic dokunma
+        // Elmas kilic ve elmas kazma -> enchant kontrolune devam et (cop olabilir)
+        if (id.contains("diamond_axe"))        return false;
+        if (id.contains("diamond_helmet"))     return false;
+        if (id.contains("diamond_chestplate")) return false;
+        if (id.contains("diamond_leggings"))   return false;
+        if (id.contains("diamond_boots"))      return false;
+        if (id.contains("diamond_bow"))        return false;
+        if (id.contains("diamond_crossbow"))   return false;
+        if (id.contains("diamond_shield"))     return false;
+        if (id.contains("diamond_trident"))    return false;
+        // diamond_sword ve diamond_pickaxe -> enchant kontrolune devam
+
+        net.minecraft.nbt.NbtList enchants = stack.getEnchantments();
+        for (int i = 0; i < enchants.size(); i++) {
+            net.minecraft.nbt.NbtCompound e = enchants.getCompound(i);
+            String enchId = e.getString("id").toLowerCase();
+            int lvl = e.getInt("lvl");
+
+            // Koruma 1-20 -> cop (netherite/diamond zirh zaten yukarda atlatildi)
+            if (enchId.contains("protection") && lvl >= 1 && lvl <= 20) return true;
+
+            // Keskinlik 1-20 -> cop (netherite/diamond kilic zaten yukarda atlatildi)
+            if (enchId.contains("sharpness") && lvl >= 1 && lvl <= 20) return true;
+
+            // Verimlilik 1-20 -> cop (netherite/diamond kazma/balta zaten yukarda atlatildi)
+            if (enchId.contains("efficiency") && lvl >= 1 && lvl <= 20) return true;
+        }
+        return false;
+    }
+
     private static boolean isGoodEquipment(String id) {
-        boolean mat  = id.contains("iron_") || id.contains("diamond_") || id.contains("netherite_");
-        boolean gear = id.contains("helmet") || id.contains("chestplate")
-                    || id.contains("leggings") || id.contains("boots")
-                    || id.contains("sword") || id.contains("pickaxe")
-                    || id.contains("axe") || id.contains("bow")
-                    || id.contains("crossbow") || id.contains("trident")
-                    || id.contains("shield");
-        return mat && gear;
+        // Netherite her sey -> koru
+        if (id.contains("netherite_")) return true;
+
+        // Elmas: sadece balta, zirh, yay, kalkan, trident -> koru
+        // Elmas kilic (diamond_sword) ve elmas kazma (diamond_pickaxe) -> cop
+        if (id.contains("diamond_axe"))        return true;
+        if (id.contains("diamond_helmet"))     return true;
+        if (id.contains("diamond_chestplate")) return true;
+        if (id.contains("diamond_leggings"))   return true;
+        if (id.contains("diamond_boots"))      return true;
+        if (id.contains("diamond_bow"))        return true;
+        if (id.contains("diamond_crossbow"))   return true;
+        if (id.contains("diamond_shield"))     return true;
+        if (id.contains("diamond_trident"))    return true;
+        // diamond_sword -> cop (buraya gelmez, atilir)
+        // diamond_pickaxe -> cop (buraya gelmez, atilir)
+
+        return false;
     }
 
     private static boolean isEquipment(ItemStack stack) {
@@ -357,7 +443,4 @@ public class InventoryActionHandler {
         return id.contains("helmet") || id.contains("chestplate")
             || id.contains("leggings") || id.contains("boots")
             || id.contains("sword") || id.contains("axe")
-            || id.contains("bow") || id.contains("crossbow")
-            || id.contains("trident") || id.contains("shield");
-    }
-}
+            || id.contains("bow") || id.contains("cros
